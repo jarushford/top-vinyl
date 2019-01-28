@@ -8,6 +8,8 @@ const albums = require('./albums.json')
     .goto(urls[99])
     .evaluate(() => {
       const artist = document.querySelector('h1#profile_title a').innerText
+      const album = document.querySelector('h1#profile_title').innerText
+      const rating = document.querySelector('span.rating_value').innerText
       const contentNodes = document.querySelectorAll('div.content a')
       const contentList = [].slice.call(contentNodes)
       const allContent = contentList.map(item => item.innerText)
@@ -25,7 +27,9 @@ const albums = require('./albums.json')
       return {
         artist,
         allContent,
-        allTracks
+        allTracks,
+        rating,
+        album
       }
     })
     .end()
