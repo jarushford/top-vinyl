@@ -12,31 +12,49 @@ app.locals.title = 'Top Vinyl'
 app.get('/api/v1/albums', (request, response) => {
   const year = request.query.year
   const rating = request.query.rating
+  const sortByYear = request.query.sortByYear
+  const sortByRating = request.query.sortByRating
 
   database('albums').select()
     .then(albums => {
-      if (year) {
-        return albums.filter(album => album.year === year)
+      const SBY = sortByYearHelper(albums, sortByYear)
+      const FBY = filterByYearHelper(SBY, year)
+      const SBR = sortByRatingHelper(FBY, sortByRating)
+      const FBR = filterByRatingHelper(SBR, rating)
+      if (FBR.length) {
+        response.status(200).json(FBR)
       } else {
-        return albums
+        response.status(404).send('Could not find any albums that match your request.')
       }
-    })
-    .then(dateFilteredAlbums => {
-      if (rating) {
-        return dateFilteredAlbums.filter(album => {
-          return parseFloat(album.rating.substring(0, 4)) >= parseFloat(rating.substring(0, 4))
-        })
-      } else {
-        return dateFilteredAlbums
-      }
-    })
-    .then(filteredAlbums => {
-      response.status(200).json(filteredAlbums)
     })
     .catch(error => {
       response.status(500).json({ error })
     })
 })
+
+function sortByYearHelper(albums, sortByYear) {
+  return sortByYear
+    ? albums.sort((a, b) => parseInt(a.year) - parseInt(b.year))
+    : albums
+}
+
+function filterByYearHelper(albums, year) {
+  return year
+    ? albums.filter(album => album.year === year)
+    : albums
+}
+
+function sortByRatingHelper(albums, sortByRating) {
+  return sortByRating
+    ? albums.sort((a, b) => parseFloat(b.rating.substring(0, 4)) - parseFloat(a.rating.substring(0, 4)))
+    : albums
+}
+
+function filterByRatingHelper(albums, rating) {
+  return rating
+    ? albums.filter(album => parseFloat(album.rating.substring(0, 4)) >= parseFloat(rating.substring(0, 4)))
+    : albums
+}
 
 app.get('/api/v1/albums/:id', (request, response) => {
   database('albums').where('id', request.params.id).select()
