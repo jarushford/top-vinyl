@@ -20,9 +20,9 @@ app.get('/api/v1/albums', (request, response) => {
       const SBY = sortByYearHelper(albums, sortByYear)
       const FBY = filterByYearHelper(SBY, year)
       const SBR = sortByRatingHelper(FBY, sortByRating)
-      const FBR = filterByRatingHelper(SBR, rating)
-      if (FBR.length) {
-        response.status(200).json(FBR)
+      const fullyFiltered = filterByRatingHelper(SBR, rating)
+      if (fullyFiltered.length) {
+        response.status(200).json(fullyFiltered)
       } else {
         response.status(404).send('Could not find any albums that match your request.')
       }
@@ -108,6 +108,86 @@ app.get('/api/v1/tracks/:id', (request, response) => {
     })
 })
 
+app.post('/api/v1/albums', (request, response) => {
+  const album = request.body
+  
+  for (let requiredParam of ['album', 'genre', 'artist', 'rating', 'year']) {
+    if (!album[requiredParam]) {
+      return response.status(422).send(`Expected format: { album: <String>, genre: <String>, artist: <String>, rating: <Integer || Float>, year: <String> }. You're missing a ${requiredParam}.`)
+    }
+  }
+
+  if (parseInt(album.rating) > 5) {
+    return response.status(422).send('Improper format for rating. Rating must be either an integer or float between 0 and 5 and must have no more than 2 decimal places.')
+  }
+
+  if (album.year.length !== 4) {
+    return response.status(422).send('Improper format for year. Year must be a string in YYYY format.')
+  }
+
+  const cleanedAlbum = { ...album, rating: album.rating.toString() + ' / 5'}
+  database('albums').insert(cleanedAlbum, 'id')
+    .then(albumID => {
+      response.status(200).send(`Album successfully added to database. Album ID is ${albumID}`)
+    })
+    .catch(error => {
+      response.status(500).json({ error })
+    })
+})
+
+app.post('/api/v1/albums/:id/tracks', (request, response) => {
+  const track = request.body
+  const albumID = request.params.id
+
+  for (let requiredParam of ['name', 'duration']) {
+    if(!track[requiredParam]) {
+      return response.status(422).send(`Expected format: { name: <String>, duration: <String> }. You're missing a ${requiredParam}.`)
+    }
+  }
+
+  const cleanedTrack = { ...track, album_id: albumID }
+  database('tracks').insert(cleanedTrack, 'id')
+    .then(trackID => {
+      response.status(200).send(`Track successfully added to album ${albumID}. Track ID is ${trackID}`)
+    })
+    .catch(error => {
+      response.status(500).json({ error })
+    })
+})
+
+app.delete('/api/v1/tracks/:id', (request, response) => {
+  database('tracks').where('id', request.params.id).del()
+    .then(trackID => {
+      if (trackID) {
+        response.status(200).send(`Successfully deleted track ${request.params.id}.`)
+      } else {
+        response.status(404).send('Could not find a track with that ID.')
+      }
+    })
+    .catch(error => {
+      response.status(500).json({ error })
+    })
+})
+
+app.delete('/api/v1/albums/:id', (request, response) => {
+  database('tracks').where('album_id', request.params.id).del()
+    .then(() => {
+      database('albums').where('id', request.params.id).del()
+        .then(projectID => {
+          if (projectID) {
+            response.status(200).send(`Successfully deleted album ${request.params.id}.`)
+          } else {
+            response.status(404).send('Could not find an album with that ID.')
+          }
+        })
+        .catch(error => {
+          response.status(500).json({ error })
+        })
+    })
+    .catch(error => {
+      response.status(500).json({ error })
+    })
+})
 
 app.use((request, response) => {
   response.status(404).send('Page Not Found')
