@@ -16,6 +16,7 @@ exports.up = function(knex, Promise) {
       table.string('duration');
       table.integer('album_id').unsigned();
       table.foreign('album_id').references('albums.id')
+      
       table.timestamps(true, true)
     })
   ])

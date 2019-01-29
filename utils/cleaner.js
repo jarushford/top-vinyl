@@ -5,7 +5,7 @@ const cleanedData = data.reduce((cleanData, album) => {
   let cleanAlbum = {
     album: cleanAlbumName(album.album),
     genre: album.allContent[0],
-    year: album.allContent[data.length - 1],
+    year: cleanYear(album.allContent),
     tracks: cleanTracks(album.allTracks),
     artist: album.artist,
     rating: `${album.rating} / 5`
@@ -13,6 +13,15 @@ const cleanedData = data.reduce((cleanData, album) => {
   cleanData.push(cleanAlbum)
   return cleanData
 }, [])
+
+function cleanYear(content) {
+  const year = content.filter(item => {
+    if (!isNaN(parseInt(item))) {
+      return item
+    }
+  })
+  return year[0]
+}
 
 function cleanAlbumName(uncleanName) {
   const nameArray = uncleanName.split('')
