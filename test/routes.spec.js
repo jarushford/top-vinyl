@@ -191,7 +191,178 @@ describe('API', () => {
   })
 
   describe('/api/v1/albums/:id', () => {
+    it('GET an album that exists', done => {
+      let id
+      chai.request(server)
+        .get('/api/v1/albums')
+        .end((err, response) => {
+          id = response.body[0].id
+          chai.request(server)
+            .get(`/api/v1/albums/${id}`)
+            .end((err, response) => {
+              response.should.have.status(200)
+              response.should.be.json
+              response.body.album.should.be.a('string')
+              response.body.genre.should.be.a('string')
+              response.body.artist.should.be.a('string')
+              response.body.rating.should.be.a('string')
+              response.body.year.should.be.a('string')
+              done()
+            })
+        })
+    })
 
+    it('GET an album that does not exist', done => {
+      chai.request(server)
+        .get(`/api/v1/albums/-4`)
+        .end((err, response) => {
+          response.should.have.status(404)
+          response.should.be.html
+          response.res.text.should.equal('Could not find that album.')
+          done()
+        })
+    })
+
+    it('PUT an album that exists', done => {
+      let id
+      chai.request(server)
+        .get('/api/v1/albums')
+        .end((err, response) => {
+          id = response.body[0].id
+          chai.request(server)
+            .put(`/api/v1/albums/${id}`)
+            .send({
+              "artist": "Pink Floyd",
+              "genre": "Rock",
+              "year": "1965",
+              "rating": 4.59,
+              "album": "The Division Bell"
+            })
+            .end((err, response) => {
+              response.should.have.status(202)
+              response.should.be.html
+              response.res.text.should.equal(`Successfully updated album ${id}.`)
+              done()
+            })
+        })
+    })
+
+    it('PUT an album that does not exist', done => {
+      chai.request(server)
+        .put(`/api/v1/albums/-4`)
+        .send({
+          "artist": "Pink Floyd",
+          "genre": "Rock",
+          "year": "1965",
+          "rating": 4.59,
+          "album": "The Division Bell"
+        })
+        .end((err, response) => {
+          response.should.have.status(404)
+          response.should.be.html
+          response.res.text.should.equal(`Could not find that album.`)
+          done()
+        })
+    })
+
+    it('PUT an album with incomplete data', done => {
+      let id
+      chai.request(server)
+        .get('/api/v1/albums')
+        .end((err, response) => {
+          id = response.body[0].id
+          chai.request(server)
+            .put(`/api/v1/albums/${id}`)
+            .send({
+              "artist": "Pink Floyd",
+              "genre": "Rock",
+              "year": "1965",
+              "album": "The Division Bell"
+            })
+            .end((err, response) => {
+              response.should.have.status(422)
+              response.should.be.html
+              response.res.text.should.equal(`Expected format: { album: <String>, genre: <String>, artist: <String>, rating: <Integer || Float>, year: <String> }. You're missing a rating.`)
+              done()
+            })
+        })
+    })
+
+    it('PUT an album with an improperly formatted rating', done => {
+      let id
+      chai.request(server)
+        .get('/api/v1/albums')
+        .end((err, response) => {
+          id = response.body[0].id
+          chai.request(server)
+            .put(`/api/v1/albums/${id}`)
+            .send({
+              "artist": "Pink Floyd",
+              "genre": "Rock",
+              "year": "1965",
+              "rating": 5.59,
+              "album": "The Division Bell"
+            })
+            .end((err, response) => {
+              response.should.have.status(422)
+              response.should.be.html
+              response.res.text.should.equal(`Improper format for rating. Rating must be either an integer or float between 0 and 5 and must have no more than 2 decimal places.`)
+              done()
+            })
+        })
+    })
+
+    it('PUT an album with an improperly formatted year', done => {
+      let id
+      chai.request(server)
+        .get('/api/v1/albums')
+        .end((err, response) => {
+          id = response.body[0].id
+          chai.request(server)
+            .put(`/api/v1/albums/${id}`)
+            .send({
+              "artist": "Pink Floyd",
+              "genre": "Rock",
+              "year": "65",
+              "rating": 4.59,
+              "album": "The Division Bell"
+            })
+            .end((err, response) => {
+              response.should.have.status(422)
+              response.should.be.html
+              response.res.text.should.equal(`Improper format for year. Year must be a string in YYYY format.`)
+              done()
+            })
+        })
+    })
+
+    it('DELETE an album successfully', done => {
+      let id
+      chai.request(server)
+        .get('/api/v1/albums')
+        .end((err, response) => {
+          id = response.body[0].id
+          chai.request(server)
+            .delete(`/api/v1/albums/${id}`)
+            .end((err, response) => {
+              response.should.have.status(202)
+              response.should.be.html
+              response.res.text.should.equal(`Successfully deleted album ${id}.`)
+              done()
+            })
+        })
+    })
+
+    it('DELETE an album that cannot be found', done => {
+      chai.request(server)
+        .delete(`/api/v1/albums/-2`)
+        .end((err, response) => {
+          response.should.have.status(404)
+          response.should.be.html
+          response.res.text.should.equal(`Could not find an album with that ID.`)
+          done()
+        })
+    })
   })
 
   describe('/api/v1/albums/:id/tracks', () => {

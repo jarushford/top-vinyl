@@ -113,12 +113,12 @@ app.put('/api/v1/albums/:id', (request, response) => {
     }
   }
 
-  if (parseInt(album.rating) > 5) {
+  if (parseFloat(album.rating) > 5 || parseFloat(album.rating) < 0) {
     return response.status(422)
       .send('Improper format for rating. Rating must be either an integer or float between 0 and 5 and must have no more than 2 decimal places.')
   }
 
-  if (album.year.length !== 4) {
+  if (parseInt(album.year.length) !== 4) {
     return response.status(422)
       .send('Improper format for year. Year must be a string in YYYY format.')
   }
