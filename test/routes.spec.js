@@ -472,6 +472,117 @@ describe('API', () => {
   })
 
   describe('/api/v1/tracks/:id', () => {
+    it('GET track that exists', done => {
+      let id
+      chai.request(server)
+        .get('/api/v1/tracks')
+        .end((err, response) => {
+          id = response.body[0].id
+          chai.request(server)
+            .get(`/api/v1/tracks/${id}`)
+            .end((err, response) => {
+              response.should.have.status(200)
+              response.should.be.json
+              response.body.should.have.property('name')
+              response.body.should.have.property('duration')
+              done()
+            })
+        })
+    })
 
+    it('GET track that does not exist', done => {
+      chai.request(server)  
+        .get(`/api/v1/tracks/-5`)
+        .end((err, response) => {
+          response.should.have.status(404)
+          response.should.be.html
+          response.res.text.should.equal('Could not find that track.')
+          done()
+        })
+    })
+
+    it('PUT a track successfully', done => {
+      let id
+      chai.request(server)
+        .get('/api/v1/tracks')
+        .end((err, response) => {
+          id = response.body[0].id
+          chai.request(server)
+            .put(`/api/v1/tracks/${id}`)
+            .send({
+              name: 'Rio',
+              duration: '8:38'
+            })
+            .end((err, response) => {
+              response.should.have.status(202)
+              response.should.be.html
+              response.res.text.should.equal(`Successfully updated track ${id}.`)
+              done()
+            })
+        })
+    })
+
+    it('PUT a track that does not exist', done => {
+      chai.request(server)
+        .put(`/api/v1/tracks/-4`)
+        .send({
+          name: 'Rio',
+          duration: '8:38'
+        })
+        .end((err, response) => {
+          response.should.have.status(404)
+          response.should.be.html
+          response.res.text.should.equal(`Could not find that album.`)
+          done()
+        })
+    })
+
+    it('PUT a track with incomplete data', done => {
+      let id
+      chai.request(server)
+        .get('/api/v1/tracks')
+        .end((err, response) => {
+          id = response.body[0].id
+          chai.request(server)
+            .put(`/api/v1/tracks/${id}`)
+            .send({
+              name: 'Rio'
+            })
+            .end((err, response) => {
+              response.should.have.status(422)
+              response.should.be.html
+              response.res.text.should.equal(`Expected format: { name: <String>, duration: <String> }. You're missing a duration.`)
+              done()
+            })
+        })
+    })
+
+    it('DELETE a track successfully', done => {
+      let id
+      chai.request(server)
+        .get('/api/v1/tracks')
+        .end((err, response) => {
+          id = response.body[0].id
+          chai.request(server)
+            .delete(`/api/v1/tracks/${id}`)
+            .end((err, response) => {
+              response.should.have.status(202)
+              response.should.be.html
+              response.res.text.should.equal(`Successfully deleted track ${id}.`)
+              done()
+            })
+        })
+    })
+
+    it('DELETE a track that cannot be found', done => {
+      chai.request(server)
+        .delete(`/api/v1/tracks/-2`)
+        .end((err, response) => {
+          response.should.have.status(404)
+          response.should.be.html
+          response.res.text.should.equal(`Could not find a track with that ID.`)
+          done()
+        })
+    })
   })
 })
