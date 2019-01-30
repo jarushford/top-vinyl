@@ -1,7 +1,13 @@
 language: node_js
 node_js:
-  - "node"
+- node
 services:
-  - postgresql
+- postgresql
 before_script:
-  - psql -c 'CREATE DATABASE vinyltest;' -U postgres
+- psql -c 'CREATE DATABASE vinyltest;' -U postgres
+deploy:
+  provider: heroku
+  api_key:
+    secure: hPtMM3TrDZStomG0Zru/BkDyflBYdsih1oIGibsH/7pajA673tjp1/o7Hx1V6MSqcTv4rPPPtPjdMX4GwBxYG4ZPywQWX5o2iMqie5FvHpcKsxB/Tud8w2iSLcpYOJUpKtd7OQXQL8Ms/0Txh3nLtjLrHybbfAkbOWBwIhdXPk9QzkC2coMk8o/eP6kKLr7WmGThYWQlzpHsn0gw4Ku9cfTAQQmmI5UYxQ+2UYST9R1bCG8mK6j7sD9Hu+ahGlr0dVzT1vLoVR2fx7BF9lBsyt4Cc3ljC6fhn0IuIAjl3W06MblWPLaF1ghF8VHfTkLrz1L6Kjzy3ufcgzizGywvswzoMhb18aTCsADUF8C629pi+S478T4zRxjW249/rVVJmRgBeAmVpcJe4bEPTfCa7wjI1st1EihWv0/Z11ll8rZVcl3PH4B9IT3fSXAXJm7xytIWMOaWi0JgBXcsf3loF5csbfB3YyonTGBxmqNpVF4kz4WfE8ITIsSaIx+KuReCqdzswX7y0u+gHEIdcX+9cSsxhbnnrwrhXQwo9chhG0NIzxx7T7QWwR4RDF1gfJSIOmRUCFN/xngiiMYVJCCLLRmNx4s0t+wnKqzd0S3T/Pz67X+iEsYyEJXnSwoOOXJlhXSvOZLXI8e/7IaD2KbA+j3QITjLSmJVOzkhB4e6Fz8=
+  app: top-vinyl
+  skip_cleanup: true
