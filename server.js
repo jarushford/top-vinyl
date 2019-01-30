@@ -4,10 +4,22 @@ const database = require('knex')(configuration)
 const bodyParser = require('body-parser')
 const express = require('express')
 const app = express()
+const {
+  validateAlbumParams,
+  validateTrackParams,
+  validateRating,
+  validateYear,
+  sortByYearHelper,
+  filterByYearHelper,
+  sortByRatingHelper,
+  filterByRatingHelper,
+  checkForID
+} = require('./utils/middleware')
 
-app.use(bodyParser.json())
 app.set('port', process.env.PORT || 3000)
 app.locals.title = 'Top Vinyl'
+
+app.use(bodyParser.json())
 
 app.get('/api/v1/albums', (request, response) => {
   const year = request.query.year
@@ -33,54 +45,8 @@ app.get('/api/v1/albums', (request, response) => {
     })
 })
 
-function sortByYearHelper(albums, sortByYear) {
-  return sortByYear
-    ? albums.sort((a, b) => parseInt(a.year) - parseInt(b.year))
-    : albums
-}
-
-function filterByYearHelper(albums, year) {
-  return year
-    ? albums.filter(album => album.year === year)
-    : albums
-}
-
-function sortByRatingHelper(albums, sortByRating) {
-  return sortByRating
-    ? albums.sort((a, b) => parseFloat(b.rating.substring(0, 4)) - parseFloat(a.rating.substring(0, 4)))
-    : albums
-}
-
-function filterByRatingHelper(albums, rating) {
-  return rating
-    ? albums.filter(album => parseFloat(album.rating.substring(0, 4)) >= parseFloat(rating.substring(0, 4)))
-    : albums
-}
-
-app.post('/api/v1/albums', (request, response) => {
+app.post('/api/v1/albums', validateAlbumParams, validateRating, validateYear, checkForID, (request, response) => {
   const album = request.body
-  
-  for (let requiredParam of ['album', 'genre', 'artist', 'rating', 'year']) {
-    if (!album[requiredParam]) {
-      return response.status(422)
-        .send(`Expected format: { album: <String>, genre: <String>, artist: <String>, rating: <Integer || Float>, year: <String> }. You're missing a ${requiredParam}.`)
-    }
-  }
-
-  if (parseFloat(album.rating) > 5 || parseFloat(album.rating) < 0) {
-    return response.status(422)
-      .send('Improper format for rating. Rating must be either an integer or float between 0 and 5 and must have no more than 2 decimal places.')
-  }
-
-  if (parseInt(album.year.length) !== 4) {
-    return response.status(422)
-      .send('Improper format for year. Year must be a string in YYYY format.')
-  }
-
-  if (album.id) {
-    return response.status(422).send('Property id cannot be set or updated.')
-  }
-
   const cleanedAlbum = { ...album, rating: album.rating.toString() + ' / 5'}
   database('albums').insert(cleanedAlbum, 'id')
     .then(albumID => {
@@ -106,30 +72,9 @@ app.get('/api/v1/albums/:id', (request, response) => {
     })
 })
 
-app.put('/api/v1/albums/:id', (request, response) => {
+app.put('/api/v1/albums/:id', validateAlbumParams, validateRating, validateYear, checkForID, (request, response) => {
   const album = request.body
   const id = request.params.id
-
-  for (let requiredParam of ['album', 'genre', 'artist', 'rating', 'year']) {
-    if (!album[requiredParam]) {
-      return response.status(422)
-        .send(`Expected format: { album: <String>, genre: <String>, artist: <String>, rating: <Integer || Float>, year: <String> }. You're missing a ${requiredParam}.`)
-    }
-  }
-
-  if (parseFloat(album.rating) > 5 || parseFloat(album.rating) < 0) {
-    return response.status(422)
-      .send('Improper format for rating. Rating must be either an integer or float between 0 and 5 and must have no more than 2 decimal places.')
-  }
-
-  if (parseInt(album.year.length) !== 4) {
-    return response.status(422)
-      .send('Improper format for year. Year must be a string in YYYY format.')
-  }
-
-  if (album.id) {
-    return response.status(422).send('Property id cannot be set or updated.')
-  }
 
   database('albums').where('id', id).update(album)
     .then(updatedRow => {
@@ -179,20 +124,9 @@ app.get('/api/v1/albums/:id/tracks', (request, response) => {
     })
 })
 
-app.post('/api/v1/albums/:id/tracks', (request, response) => {
+app.post('/api/v1/albums/:id/tracks', validateTrackParams, checkForID, (request, response) => {
   const track = request.body
   const albumID = request.params.id
-
-  for (let requiredParam of ['name', 'duration']) {
-    if(!track[requiredParam]) {
-      return response.status(422)
-        .send(`Expected format: { name: <String>, duration: <String> }. You're missing a ${requiredParam}.`)
-    }
-  }
-
-  if (track.id) {
-    return response.status(422).send('Property id cannot be set or updated.')
-  }
 
   const cleanedTrack = { ...track, album_id: albumID }
   database('albums').where('id', albumID).select()
@@ -239,20 +173,9 @@ app.get('/api/v1/tracks/:id', (request, response) => {
     })
 })
 
-app.put('/api/v1/tracks/:id', (request, response) => {
+app.put('/api/v1/tracks/:id', validateTrackParams, checkForID, (request, response) => {
   const track = request.body
   const id = request.params.id
-
-  for (let requiredParam of ['name', 'duration']) {
-    if (!track[requiredParam]) {
-      return response.status(422)
-        .send(`Expected format: { name: <String>, duration: <String> }. You're missing a ${requiredParam}.`)
-    }
-  }
-
-  if (track.id) {
-    return response.status(422).send('Property id cannot be set or updated.')
-  }
 
   database('tracks').where('id', id).update(track)
     .then(trackID => {
