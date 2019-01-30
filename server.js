@@ -77,6 +77,10 @@ app.post('/api/v1/albums', (request, response) => {
       .send('Improper format for year. Year must be a string in YYYY format.')
   }
 
+  if (album.id) {
+    return response.status(422).send('Property id cannot be set or updated.')
+  }
+
   const cleanedAlbum = { ...album, rating: album.rating.toString() + ' / 5'}
   database('albums').insert(cleanedAlbum, 'id')
     .then(albumID => {
@@ -121,6 +125,10 @@ app.put('/api/v1/albums/:id', (request, response) => {
   if (parseInt(album.year.length) !== 4) {
     return response.status(422)
       .send('Improper format for year. Year must be a string in YYYY format.')
+  }
+
+  if (album.id) {
+    return response.status(422).send('Property id cannot be set or updated.')
   }
 
   database('albums').where('id', id).update(album)
@@ -182,6 +190,10 @@ app.post('/api/v1/albums/:id/tracks', (request, response) => {
     }
   }
 
+  if (track.id) {
+    return response.status(422).send('Property id cannot be set or updated.')
+  }
+
   const cleanedTrack = { ...track, album_id: albumID }
   database('albums').where('id', albumID).select()
     .then(albums => {
@@ -236,6 +248,10 @@ app.put('/api/v1/tracks/:id', (request, response) => {
       return response.status(422)
         .send(`Expected format: { name: <String>, duration: <String> }. You're missing a ${requiredParam}.`)
     }
+  }
+
+  if (track.id) {
+    return response.status(422).send('Property id cannot be set or updated.')
   }
 
   database('tracks').where('id', id).update(track)

@@ -153,6 +153,26 @@ describe('API', () => {
         })
     })
 
+    it('POST with an id', done => {
+      chai.request(server)
+        .post('/api/v1/albums')
+        .send({
+          "artist": "Pink Floyd",
+          "genre": "Rock",
+          "year": "1968",
+          "rating": 4.79,
+          "album": "The Division Bell",
+          "id": 45
+        })
+        .end((err, response) => {
+          response.should.have.status(422)
+          response.should.be.html
+          response.res.text.should.equal('Property id cannot be set or updated.')
+          done()
+        })
+    })
+
+
     it('POST an album with an improperly formatted rating', done => {
       chai.request(server)
         .post('/api/v1/albums')
@@ -262,6 +282,31 @@ describe('API', () => {
           response.should.be.html
           response.res.text.should.equal(`Could not find that album.`)
           done()
+        })
+    })
+
+    it('PUT with an id', done => {
+      let id
+      chai.request(server)
+        .get('/api/v1/albums')
+        .end((err, response) => {
+          id = response.body[0].id
+          chai.request(server)
+            .put(`/api/v1/albums/${id}`)
+            .send({
+              "artist": "Pink Floyd",
+              "genre": "Rock",
+              "year": "1965",
+              "rating": 4.59,
+              "id": 56,
+              "album": "The Division Bell"
+            })
+            .end((err, response) => {
+              response.should.have.status(422)
+              response.should.be.html
+              response.res.text.should.equal(`Property id cannot be set or updated.`)
+              done()
+            })
         })
     })
 
@@ -433,6 +478,28 @@ describe('API', () => {
         })
     })
 
+    it('POST with an id', done => {
+      let id
+      chai.request(server)
+        .get('/api/v1/albums')
+        .end((err, response) => {
+          id = response.body[0].id
+          chai.request(server)
+            .post(`/api/v1/albums/${id}/tracks`)
+            .send({
+              name: 'Breathe',
+              duration: '3:46',
+              id: 86
+            })
+            .end((err, response) => {
+              response.should.have.status(422)
+              response.should.be.html
+              response.res.text.should.equal('Property id cannot be set or updated.')
+              done()
+            })
+        })
+    })
+
     it('POST a track with incomplete data', done => {
       let id
       chai.request(server)
@@ -534,6 +601,28 @@ describe('API', () => {
           response.should.be.html
           response.res.text.should.equal(`Could not find that album.`)
           done()
+        })
+    })
+
+    it('PUT with an id', done => {
+      let id
+      chai.request(server)
+        .get('/api/v1/tracks')
+        .end((err, response) => {
+          id = response.body[0].id
+          chai.request(server)
+            .put(`/api/v1/tracks/${id}`)
+            .send({
+              name: 'Rio',
+              duration: '8:38',
+              id: 12
+            })
+            .end((err, response) => {
+              response.should.have.status(422)
+              response.should.be.html
+              response.res.text.should.equal(`Property id cannot be set or updated.`)
+              done()
+            })
         })
     })
 
