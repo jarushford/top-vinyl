@@ -205,7 +205,7 @@ app.delete('/api/v1/tracks/:id', (request, response) => {
 })
 
 app.use((request, response) => {
-  response.status(404).send('Page Not Found')
+  response.status(404).send('Page Not Found. You can find the main API at the extension \'/api/v1/albums\'')
 })
 
 app.listen(app.get('port'), () => {
