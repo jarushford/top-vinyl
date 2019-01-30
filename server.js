@@ -163,7 +163,7 @@ app.get('/api/v1/albums/:id/tracks', (request, response) => {
       if (tracks.length) {
         response.status(200).json(tracks)
       } else {
-        response.status(404).send('Could not find any tracks for that album')
+        response.status(404).send('Could not find any tracks for that album.')
       }
     })
     .catch(error => {
@@ -183,13 +183,19 @@ app.post('/api/v1/albums/:id/tracks', (request, response) => {
   }
 
   const cleanedTrack = { ...track, album_id: albumID }
-  database('tracks').insert(cleanedTrack, 'id')
-    .then(trackID => {
-      if (trackID) {
-        response.status(201)
-          .send(`Track successfully added to album ${albumID}. Track ID is ${trackID}`)
+  database('albums').where('id', albumID).select()
+    .then(albums => {
+      if (albums.length) {
+        database('tracks').insert(cleanedTrack, 'id')
+          .then(trackID => {
+            response.status(201)
+              .send(`Track successfully added to album ${albumID}. Track ID is ${trackID}`)
+          })
+          .catch(error => {
+            response.status(500).json({ error })
+          })
       } else {
-        response.status(404).send('Could not find that album.')
+        response.status(404).send('Could not find an album with that ID.')
       }
     })
     .catch(error => {

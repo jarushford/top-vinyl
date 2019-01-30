@@ -366,11 +366,109 @@ describe('API', () => {
   })
 
   describe('/api/v1/albums/:id/tracks', () => {
+    it('GET tracks for an album that exists', done => {
+      let id
+      chai.request(server)
+        .get('/api/v1/albums')
+        .end((err, response) => {
+          id = response.body[0].id
+          chai.request(server)
+            .get(`/api/v1/albums/${id}/tracks`)
+            .end((err, response) => {
+              response.should.have.status(200)
+              response.should.be.json
+              response.body[0].should.have.property('name')
+              response.body[0].name.should.be.a('string')
+              response.body[0].should.have.property('duration')
+              response.body[0].duration.should.be.a('string')
+              done()
+            })
+        })
+    })
 
+    it('GET tracks for an album that does not exist', done => {
+      chai.request(server)
+        .get(`/api/v1/albums/-3/tracks`)
+        .end((err, response) => {
+          response.should.have.status(404)
+          response.should.be.html
+          response.res.text.should.equal('Could not find any tracks for that album.')
+          done()
+        })
+    })
+
+    it('POST a track to an existing album', done => {
+      let id
+      chai.request(server)
+        .get('/api/v1/albums')
+        .end((err, response) => {
+          id = response.body[0].id
+          chai.request(server)
+            .post(`/api/v1/albums/${id}/tracks`)
+            .send({
+              name: 'Breathe',
+              duration: '3:46'
+            })
+            .end((err, response) => {
+              response.should.have.status(201)
+              response.should.be.html
+              response.res.text.should.be.a('string')
+              done()
+            })
+        })
+    })
+
+    it('POST a track to an album that does not exist', done => {
+      chai.request(server)
+        .post(`/api/v1/albums/2/tracks`)
+        .send({
+          name: 'Breathe',
+          duration: '3:46'
+        })
+        .end((err, response) => {
+          response.should.have.status(404)
+          response.should.be.html
+          response.res.text.should.equal('Could not find an album with that ID.')
+          done()
+        })
+    })
+
+    it('POST a track with incomplete data', done => {
+      let id
+      chai.request(server)
+        .get('/api/v1/albums')
+        .end((err, response) => {
+          id = response.body[0].id
+          chai.request(server)
+            .post(`/api/v1/albums/${id}/tracks`)
+            .send({
+              name: 'Breathe'
+            })
+            .end((err, response) => {
+              response.should.have.status(422)
+              response.should.be.html
+              response.res.text.should.equal('Expected format: { name: <String>, duration: <String> }. You\'re missing a duration.')
+              done()
+            })
+        })
+    })
   })
 
   describe('/api/v1/tracks', () => {
-
+    it('GET all tracks', done => {
+      chai.request(server)
+        .get('/api/v1/tracks')
+        .end((err, response) => {
+          response.should.have.status(200)
+          response.body.should.be.a('array')
+          response.body.should.have.length(5)
+          response.body[0].should.have.property('name')
+          response.body[0].name.should.be.a('string')
+          response.body[0].should.have.property('duration')
+          response.body[0].duration.should.be.a('string')
+          done()
+        })
+    })
   })
 
   describe('/api/v1/tracks/:id', () => {
