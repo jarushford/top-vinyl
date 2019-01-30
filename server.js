@@ -67,12 +67,12 @@ app.post('/api/v1/albums', (request, response) => {
     }
   }
 
-  if (parseInt(album.rating) > 5) {
+  if (parseFloat(album.rating) > 5 || parseFloat(album.rating) < 0) {
     return response.status(422)
       .send('Improper format for rating. Rating must be either an integer or float between 0 and 5 and must have no more than 2 decimal places.')
   }
 
-  if (album.year.length !== 4) {
+  if (parseInt(album.year.length) !== 4) {
     return response.status(422)
       .send('Improper format for year. Year must be a string in YYYY format.')
   }
@@ -105,6 +105,23 @@ app.get('/api/v1/albums/:id', (request, response) => {
 app.put('/api/v1/albums/:id', (request, response) => {
   const album = request.body
   const id = request.params.id
+
+  for (let requiredParam of ['album', 'genre', 'artist', 'rating', 'year']) {
+    if (!album[requiredParam]) {
+      return response.status(422)
+        .send(`Expected format: { album: <String>, genre: <String>, artist: <String>, rating: <Integer || Float>, year: <String> }. You're missing a ${requiredParam}.`)
+    }
+  }
+
+  if (parseInt(album.rating) > 5) {
+    return response.status(422)
+      .send('Improper format for rating. Rating must be either an integer or float between 0 and 5 and must have no more than 2 decimal places.')
+  }
+
+  if (album.year.length !== 4) {
+    return response.status(422)
+      .send('Improper format for year. Year must be a string in YYYY format.')
+  }
 
   database('albums').where('id', id).update(album)
     .then(updatedRow => {
@@ -207,6 +224,13 @@ app.get('/api/v1/tracks/:id', (request, response) => {
 app.put('/api/v1/tracks/:id', (request, response) => {
   const track = request.body
   const id = request.params.id
+
+  for (let requiredParam of ['name', 'duration']) {
+    if (!track[requiredParam]) {
+      return response.status(422)
+        .send(`Expected format: { name: <String>, duration: <String> }. You're missing a ${requiredParam}.`)
+    }
+  }
 
   database('tracks').where('id', id).update(track)
     .then(trackID => {
