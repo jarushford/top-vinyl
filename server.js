@@ -4,6 +4,7 @@ const database = require('knex')(configuration)
 const bodyParser = require('body-parser')
 const express = require('express')
 const app = express()
+const cors = require('cors')
 const {
   validateAlbumParams,
   validateTrackParams,
@@ -18,7 +19,7 @@ const {
 
 app.set('port', process.env.PORT || 3000)
 app.locals.title = 'Top Vinyl'
-
+app.use(cors())
 app.use(bodyParser.json())
 
 app.get('/api/v1/albums', (request, response) => {
