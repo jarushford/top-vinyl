@@ -6,6 +6,11 @@ An API serving up data on some of the top vinyl albums from 1958-1992
 
 <br/>
 
+### [SETUP INSTRUCTIONS](https://github.com/jarushford/top-vinyl/blob/master/setup.md)
+### [CONTRIBUTING](https://github.com/jarushford/top-vinyl/blob/master/contributing.md)
+
+<br/>
+
 ### [BASE URL](https://top-vinyl.herokuapp.com)
 
 ```
