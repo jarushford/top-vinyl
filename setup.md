@@ -2,10 +2,8 @@
 
 These setup instructions assume you have Postgres installed and `nodemon` installed globally.
 
-Fork this repo then clone locally
-
 ```
-git clone https://github.com/<YOUR GITHUB USERNAME>/top-vinyl.git
+git clone https://github.com/jarushford/top-vinyl.git
 
 cd top-vinyl
 
