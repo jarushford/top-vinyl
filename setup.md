@@ -9,6 +9,8 @@ git clone https://github.com/jarushford/top-vinyl.git
 
 cd top-vinyl
 
+git remote add upstream https://github.com/jarushford/top-vinyl (this is the remote you will rebase from)
+
 npm install
 ```
 
