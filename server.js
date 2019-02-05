@@ -182,7 +182,7 @@ app.put('/api/v1/tracks/:id', validateTrackParams, checkForID, (request, respons
   database('tracks').where('id', id).update(track)
     .then(trackID => {
       if (trackID) {
-        response.status(202).send(`Successfully updated track ${id}.`)
+        response.status(202).send({message: `Successfully updated track ${id}.`, id})
       } else {
         response.status(404).send('Could not find that album.')
       }
