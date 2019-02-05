@@ -52,7 +52,7 @@ app.post('/api/v1/albums', validateAlbumParams, validateRating, validateYear, ch
   database('albums').insert(cleanedAlbum, 'id')
     .then(albumID => {
       response.status(201)
-        .send(`Album successfully added to database. Album ID is ${albumID}`)
+        .json({message: `Album successfully added to database. Album ID is ${albumID[0]}`, id: albumID[0]})
     })
     .catch(error => {
       response.status(500).json({ error })
@@ -75,12 +75,12 @@ app.get('/api/v1/albums/:id', (request, response) => {
 
 app.put('/api/v1/albums/:id', validateAlbumParams, validateRating, validateYear, checkForID, (request, response) => {
   const album = request.body
-  const id = request.params.id
+  const id = parseInt(request.params.id)
 
   database('albums').where('id', id).update(album)
     .then(updatedRow => {
       if (updatedRow) {
-        response.status(202).send(`Successfully updated album ${id}.`)
+        response.status(202).json({message: `Successfully updated album ${id}.`, id})
       } else {
         response.status(404).send('Could not find that album.')
       }
@@ -91,13 +91,14 @@ app.put('/api/v1/albums/:id', validateAlbumParams, validateRating, validateYear,
 })
 
 app.delete('/api/v1/albums/:id', (request, response) => {
-  database('tracks').where('album_id', request.params.id).del()
+  const { id } = request.params
+  database('tracks').where('album_id', id).del()
     .then(() => {
-      database('albums').where('id', request.params.id).del()
+      database('albums').where('id', id).del()
         .then(projectID => {
           if (projectID) {
             response.status(202)
-              .send(`Successfully deleted album ${request.params.id}.`)
+              .json({message: `Successfully deleted album ${id}.`, id})
           } else {
             response.status(404).send('Could not find an album with that ID.')
           }
@@ -136,7 +137,7 @@ app.post('/api/v1/albums/:id/tracks', validateTrackParams, checkForID, (request,
         database('tracks').insert(cleanedTrack, 'id')
           .then(trackID => {
             response.status(201)
-              .send(`Track successfully added to album ${albumID}. Track ID is ${trackID}`)
+              .json({message: `Track successfully added to album ${albumID}. Track ID is ${trackID[0]}`, id: trackID[0]})
           })
           .catch(error => {
             response.status(500).json({ error })
@@ -176,12 +177,12 @@ app.get('/api/v1/tracks/:id', (request, response) => {
 
 app.put('/api/v1/tracks/:id', validateTrackParams, checkForID, (request, response) => {
   const track = request.body
-  const id = request.params.id
+  const id = parseInt(request.params.id)
 
   database('tracks').where('id', id).update(track)
     .then(trackID => {
       if (trackID) {
-        response.status(202).send(`Successfully updated track ${id}.`)
+        response.status(202).json({message: `Successfully updated track ${id}.`, id})
       } else {
         response.status(404).send('Could not find that album.')
       }
@@ -192,10 +193,11 @@ app.put('/api/v1/tracks/:id', validateTrackParams, checkForID, (request, respons
 })
 
 app.delete('/api/v1/tracks/:id', (request, response) => {
-  database('tracks').where('id', request.params.id).del()
+  const id = parseInt(request.params.id)
+  database('tracks').where('id', id).del()
     .then(trackID => {
       if (trackID) {
-        response.status(202).send(`Successfully deleted track ${request.params.id}.`)
+        response.status(202).json({message: `Successfully deleted track ${id}.`, id})
       } else {
         response.status(404).send('Could not find a track with that ID.')
       }
