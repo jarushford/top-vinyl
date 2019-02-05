@@ -3,6 +3,8 @@
 These setup instructions assume you have Postgres installed and `nodemon` installed globally.
 
 ```
+Fork this repo and then clone from your own forked copy
+
 git clone https://github.com/jarushford/top-vinyl.git
 
 cd top-vinyl
