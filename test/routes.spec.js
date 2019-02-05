@@ -130,8 +130,10 @@ describe('API', () => {
         })
         .end((err, response) => {
           response.should.have.status(201)
-          response.should.be.html
-          response.res.text.should.be.a('string')
+          response.should.be.json
+          response.body.should.be.a('object')
+          response.body.should.have.property('message')
+          response.body.should.have.property('id')
           done()
         })
     })
