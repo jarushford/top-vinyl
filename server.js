@@ -182,7 +182,7 @@ app.put('/api/v1/tracks/:id', validateTrackParams, checkForID, (request, respons
   database('tracks').where('id', id).update(track)
     .then(trackID => {
       if (trackID) {
-        response.status(202).send({message: `Successfully updated track ${id}.`, id})
+        response.status(202).json({message: `Successfully updated track ${id}.`, id})
       } else {
         response.status(404).send('Could not find that album.')
       }
@@ -193,10 +193,11 @@ app.put('/api/v1/tracks/:id', validateTrackParams, checkForID, (request, respons
 })
 
 app.delete('/api/v1/tracks/:id', (request, response) => {
-  database('tracks').where('id', request.params.id).del()
+  const { id } = request.params.id
+  database('tracks').where('id', id).del()
     .then(trackID => {
       if (trackID) {
-        response.status(202).send(`Successfully deleted track ${request.params.id}.`)
+        response.status(202).json({message: `Successfully deleted track ${id}.`, id})
       } else {
         response.status(404).send('Could not find a track with that ID.')
       }
