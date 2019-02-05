@@ -75,7 +75,7 @@ app.get('/api/v1/albums/:id', (request, response) => {
 
 app.put('/api/v1/albums/:id', validateAlbumParams, validateRating, validateYear, checkForID, (request, response) => {
   const album = request.body
-  const id = request.params.id
+  const id = parseInt(request.params.id)
 
   database('albums').where('id', id).update(album)
     .then(updatedRow => {

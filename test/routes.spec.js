@@ -268,6 +268,7 @@ describe('API', () => {
               response.body.should.be.a('object')
               response.body.should.have.property('message')
               response.body.should.have.property('id')
+              response.body.id.should.be.a('number')
               response.body.message.should.equal(`Successfully updated album ${id}.`)
               done()
             })
