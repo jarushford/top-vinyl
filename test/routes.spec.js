@@ -396,8 +396,10 @@ describe('API', () => {
             .delete(`/api/v1/albums/${id}`)
             .end((err, response) => {
               response.should.have.status(202)
-              response.should.be.html
-              response.res.text.should.equal(`Successfully deleted album ${id}.`)
+              response.should.be.json
+              response.body.should.have.property('message')
+              response.body.should.have.property('id')
+              response.body.message.should.equal(`Successfully deleted album ${id}.`)
               done()
             })
         })
