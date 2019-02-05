@@ -80,7 +80,7 @@ app.put('/api/v1/albums/:id', validateAlbumParams, validateRating, validateYear,
   database('albums').where('id', id).update(album)
     .then(updatedRow => {
       if (updatedRow) {
-        response.status(202).send(`Successfully updated album ${id}.`)
+        response.status(202).json({message: `Successfully updated album ${id}.`, id})
       } else {
         response.status(404).send('Could not find that album.')
       }
