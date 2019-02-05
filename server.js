@@ -177,7 +177,7 @@ app.get('/api/v1/tracks/:id', (request, response) => {
 
 app.put('/api/v1/tracks/:id', validateTrackParams, checkForID, (request, response) => {
   const track = request.body
-  const id = request.params.id
+  const id = parseInt(request.params.id)
 
   database('tracks').where('id', id).update(track)
     .then(trackID => {
