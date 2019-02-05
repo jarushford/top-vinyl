@@ -91,13 +91,14 @@ app.put('/api/v1/albums/:id', validateAlbumParams, validateRating, validateYear,
 })
 
 app.delete('/api/v1/albums/:id', (request, response) => {
-  database('tracks').where('album_id', request.params.id).del()
+  const { id } = request.params
+  database('tracks').where('album_id', id).del()
     .then(() => {
-      database('albums').where('id', request.params.id).del()
+      database('albums').where('id', id).del()
         .then(projectID => {
           if (projectID) {
             response.status(202)
-              .send(`Successfully deleted album ${request.params.id}.`)
+              .json({message: `Successfully deleted album ${id}.`, id})
           } else {
             response.status(404).send('Could not find an album with that ID.')
           }
