@@ -52,7 +52,7 @@ app.post('/api/v1/albums', validateAlbumParams, validateRating, validateYear, ch
   database('albums').insert(cleanedAlbum, 'id')
     .then(albumID => {
       response.status(201)
-        .send(`Album successfully added to database. Album ID is ${albumID}`)
+        .json({message: `Album successfully added to database. Album ID is ${albumID}`, id: albumID})
     })
     .catch(error => {
       response.status(500).json({ error })
