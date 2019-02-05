@@ -193,7 +193,7 @@ app.put('/api/v1/tracks/:id', validateTrackParams, checkForID, (request, respons
 })
 
 app.delete('/api/v1/tracks/:id', (request, response) => {
-  const { id } = request.params
+  const id = parseInt(request.params.id)
   database('tracks').where('id', id).del()
     .then(trackID => {
       if (trackID) {

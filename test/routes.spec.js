@@ -591,7 +591,6 @@ describe('API', () => {
               duration: '8:38'
             })
             .end((err, response) => {
-              console.log(response.body.id)
               response.should.have.status(202)
               response.should.be.json
               response.body.should.be.a('object')
@@ -671,8 +670,12 @@ describe('API', () => {
             .delete(`/api/v1/tracks/${id}`)
             .end((err, response) => {
               response.should.have.status(202)
-              response.should.be.html
-              response.res.text.should.equal(`Successfully deleted track ${id}.`)
+              response.should.be.json
+              response.body.should.be.a('object')
+              response.body.should.have.property('message')
+              response.body.should.have.property('id')
+              response.body.id.should.be.a('number')
+              response.body.message.should.equal(`Successfully deleted track ${id}.`)
               done()
             })
         })
