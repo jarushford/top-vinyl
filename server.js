@@ -137,7 +137,7 @@ app.post('/api/v1/albums/:id/tracks', validateTrackParams, checkForID, (request,
         database('tracks').insert(cleanedTrack, 'id')
           .then(trackID => {
             response.status(201)
-              .json({message: `Track successfully added to album ${albumID}. Track ID is ${trackID}`, id: trackID})
+              .json({message: `Track successfully added to album ${albumID}. Track ID is ${trackID[0]}`, id: trackID[0]})
           })
           .catch(error => {
             response.status(500).json({ error })
